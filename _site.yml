@@ -3,11 +3,17 @@ output_dir: "."
 navbar:
   title: "Home"
   right:
-    - text: "About"
-      href: web.html
-    - icon: fa-envelope fa-lg
-      href: mailto:<you@youremail.com>
+    - text: "Data source"
+      href: data.html
+    - text: "Dashboard"
+      href: web.html 
+    - text: "Shiny"
+      href: http://www.google.com
+    - text: "Result"
+      href: final_report.html 
     - icon: fa-github fa-lg
-      href: http://github.com/<YOUR_GH_NAME>/
+      href: http://github.com/Adashaw77/
+    - icon: fas fa-play
+      href: http://github.com/Adashaw77/
 output:
   html_document

@@ -3,7 +3,9 @@ title: "Dashboard"
 output: 
   flexdashboard::flex_dashboard:
     vertical_layout: fill
+    theme: cosmo                                                                                            
 ---
+
 
 ```{r dashboard, include=FALSE}
 
@@ -53,11 +55,11 @@ poverty= read_csv("./data/poverty/Data.csv") %>%
 data = rbind(asthma_air,sulfur_dioxide,ozone, poverty)
   
 asthma_air1 = data %>%
-  select(name, description, Measure, geo_entity_name, geo_entity_id, year = year_description, data_value) %>%
+  dplyr::select(name, description, Measure, geo_entity_name, geo_entity_id, year = year_description, data_value) %>%
   janitor::clean_names() %>% 
   filter(measure %in% c("Mean", "Rate", "Number", "Percent", "Age-Adjusted Percent", "Age-Adjusted Rate ")) %>%
   mutate(name_measure=str_c(name,"-",measure)) %>%
-  select(-name, -measure, -description, -year) %>%
+  dplyr::select(-name, -measure, -description, -year) %>%
   spread(key = name_measure, value = data_value) %>%
   janitor::clean_names()
 
@@ -77,7 +79,7 @@ tree_df = read_csv("./data/2015StreetTreesCensus_TREES.csv") %>%
 
 zipcode_uhf42 = read_excel("./data/Zipcode_UHF42.xlsx") %>%
    gather(key = zipcode_no, value = zipcode, zipcode1:zipcode9) %>%
-   select(-zipcode_no, uhf42_name) %>%
+   dplyr::select(-zipcode_no, uhf42_name) %>%
    filter(is.na(zipcode) == FALSE)
 
 tree_df = left_join(tree_df, zipcode_uhf42, by = "zipcode") 
@@ -107,36 +109,36 @@ asthma_em_0to4 = asthma_air %>%
   filter(name == "Asthma Emergency Department Visits (Children 0 to 4 Yrs Old)",
          measure == "Rate",
          year_description == "2015") %>%
-  select(geo_entity_id, geo_entity_name, asthma_em_0to4 = data_value)
+  dplyr::select(geo_entity_id, geo_entity_name, asthma_em_0to4 = data_value)
 
 asthma_em_5to14 = asthma_air %>%
   filter(name == "Asthma Emergency Department Visits (Children 5 to 14 Yrs Old)",
          measure == "Rate",
          year_description == "2015") %>%
-  select(geo_entity_id, asthma_em_5to14 = data_value) 
+  dplyr::select(geo_entity_id, asthma_em_5to14 = data_value) 
 
 so2 = asthma_air %>%
   filter(name == "Sulfur Dioxide (SO2)",
          measure == "Mean",
          year_description == "Winter 2014-15") %>%
-  select(geo_entity_id, so2 = data_value)
+  dplyr::select(geo_entity_id, so2 = data_value)
 
 poverty = read_csv("./data/poverty/Data.csv") %>%
   janitor::clean_names() %>%
   filter(year_description == "2012-16",
          measure == "Percent",
          name == "Poverty") %>%
-  select(geo_entity_id, poverty = data_value) 
+  dplyr::select(geo_entity_id, poverty = data_value) 
 
 poverty_under5 = read_csv("./data/poverty/Data.csv") %>%
   janitor::clean_names() %>%
   filter(year_description == "2011-15",
          measure == "Percent",
          name == "Children under 5 years old in Poverty") %>%
-  select(geo_entity_id, poverty_under5 = data_value) 
+  dplyr::select(geo_entity_id, poverty_under5 = data_value) 
 
 tree_density_total = tree_density%>%
-  select(geo_entity_id=uhf42_code,tree_density) %>%
+  dplyr::select(geo_entity_id=uhf42_code,tree_density) %>%
   distinct()
 
 final_df = left_join(asthma_em_0to4,asthma_em_5to14) %>%
@@ -184,30 +186,23 @@ plot_ly(x= ~rate, y= ~geo_entity_name, color = ~asthma_age, type = 'bar', orient
   layout(
          yaxis = ax,
          xaxis = list(title = "rate") 
+         
   )
 ```
 
 Column {data-width=550}
 -----------------------------------------------------------------------
-### Chart C
+### Scatterplot between SO2 and the rate of asthma emergency department visits in different age group children
 
 ```{r}
-old = filter(final_asthma_df,asthma_age == "asthma_em_5to14")
-young = filter(final_asthma_df,asthma_age == "asthma_em_0to4")
-fit1 = lm(rate~so2,data = old)
-fit2 = lm(rate~so2,data = young)
-subplot(
-  plot_ly(old, x = ~so2, y = ~rate)%>% 
-    add_markers(alpha = 0.5,name = "age from 5 to 14") %>% 
-    add_lines(y=fitted(fit1),name = "lm for age 5 to 14"),
-  plot_ly(young, x = ~so2, y = ~rate) %>% 
-    add_markers(alpha = 0.5,name = "age from 0 to 4") %>% 
-   add_lines(y=fitted(fit2),name = "lm for age 0 to 4")
-)
+so2_plot = ggplot(final_asthma_df) +
+   geom_point(aes(x=so2,y=rate,color=asthma_age))+
+   geom_smooth(aes(x=so2,y=rate,color = asthma_age), method = "lm",se=F)+theme(legend.position = "none")
+ggplotly(so2_plot)
 ```
 
 
-### Chart D {.tabset}
+### Scatterplot between poverty and the rate of asthma emergency department visits in different age griup children
 
 ```{r}
 #asthma and poverty
@@ -218,13 +213,6 @@ poverty = ggplot(final_asthma_df) +
 
 ```
 
-### Chart E 
 
-```{r}
-#asthma and tree
-tree_plot = ggplot(final_asthma_df) +
-  geom_point(aes(x=tree_density,y=rate,color=asthma_age))+
-   geom_smooth(aes(x=tree_density,y=rate,color = asthma_age), method = "lm",se=F)+theme(legend.position = "none")
-ggplotly(tree_plot)
 
-```
+

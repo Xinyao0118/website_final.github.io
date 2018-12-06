@@ -1,7 +1,16 @@
 ---
-title: "Holy cow!"
+output:
+  html_document:
+    theme: sandstone
+    highlight: monochrome
 ---
 
-### I have a webpage!
+<div class="cd-fixed-bg cd-fixed-bg--1"> 
+  <h1 class = "front-page-title" style = "padding-top:10%">
+    P8105 Final Project - NY Organ Donation 
+  <h1>
+</div> 
 
-And I can put all kinds of stuff on it!
+<div >
+</br>
+</div>
